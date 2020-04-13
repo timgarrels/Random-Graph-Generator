@@ -1,8 +1,11 @@
+"""Create a random Graph or Tree to a graphviz file"""
 import random
 from subprocess import call
+import os
 
 
 class RandomGraphGenerator(object):
+    """Generates random nodes and connections to create graphs"""
 
     def __init__(self):
 
@@ -17,6 +20,7 @@ class RandomGraphGenerator(object):
         self.connection_amount_range = (0, 0)
 
     def new_graph(self):
+        """Generates a random graph, saves and renders it"""
         self.new_amounts()
         nodes, connections = self.generate_graph()
         lines = self.dot_language_from(nodes, connections)
@@ -24,6 +28,7 @@ class RandomGraphGenerator(object):
         self.render_graph("graph")
 
     def new_tree(self):
+        """Generates a random tree, saves and renders it"""
         self.new_amounts()
         nodes, connections = self.generate_tree()
         lines = self.dot_language_from(nodes, connections)
@@ -31,10 +36,12 @@ class RandomGraphGenerator(object):
         self.render_graph("tree")
 
     def new_amounts(self):
+        """Randomize node and connection amount"""
         self.node_amount = random.randint(self.options['min_node_amount'], self.options['max_node_amount'])
         self.connection_amount_range = (self.options['min_connection_amount'], random.choice(range(self.options['min_connection_amount'] + 1, self.options['max_connection_amount'])))
 
     def generate_tree(self):
+        """Generates a tree"""
         # Create Tree
         node_count = 1
         nodes = ["Root"]
@@ -42,10 +49,12 @@ class RandomGraphGenerator(object):
         connections = []
 
         while node_count < self.node_amount:
+            # Choose random from node list, append random children to node
             random.shuffle(nodes)
             current_node = nodes.pop(0)
             children_amount = random.randint(self.connection_amount_range[0], self.connection_amount_range[1])
             for n in range(children_amount):
+                # Add children to node list and add connections to parent node
                 node_count += 1
                 children_name = "N" + str(node_count)
                 nodes.append(children_name)
@@ -58,12 +67,15 @@ class RandomGraphGenerator(object):
         return nodes, connections
 
     def generate_graph(self):
+        """Generates a graph"""
         connections = set()
 
+        # Create Nodes
         nodes = {}
         for n in range(self.node_amount):
             nodes["N" + str(n)] = random.randint(self.connection_amount_range[0], self.connection_amount_range[1])
-            
+
+        # Create random connections
         for key in nodes.keys():
             while nodes[key] > 0:
                 next_node = random.choice(list(nodes.keys()))
@@ -75,6 +87,7 @@ class RandomGraphGenerator(object):
 
     def dot_language_from(self, nodes, connections):
         """Parse nodes and connection array to a dot language lines"""
+        # This does explicitly not use graphviz python interface lib
 
         # Set language symbols
         connection_symbol = "--"
@@ -109,5 +122,5 @@ class RandomGraphGenerator(object):
 
     def render_graph(self, dot_file):
         """Call extern bash script to render all graph visualizations"""
-        call('~/my_data/projects/programming/flask_tree/render.sh {}'.format(dot_file), shell=True)
+        call(os.path.dirname(os.path.abspath(__file__)) + '/render.sh {}'.format(dot_file), shell=True)
 

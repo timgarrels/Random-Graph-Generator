@@ -1,4 +1,5 @@
 FILENAME=$1
+mkdir -p ./static/images/
 dot -Tsvg -o ./static/images/dot_$FILENAME.svg static/$FILENAME
 neato -Tsvg -o ./static/images/neato_$FILENAME.svg static/$FILENAME
 twopi -Tsvg -o ./static/images/twopi_$FILENAME.svg static/$FILENAME
